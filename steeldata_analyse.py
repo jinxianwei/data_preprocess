@@ -24,9 +24,9 @@ path_file_annotations_POIs_polygons = '/root/autodl-tmp/SEM_rawdata/nature_scida
 random.seed(0)
 split_rate = 0.2  # train:val=8:2
 
-train_root = "./train"
+train_root = "/root/autodl-tmp/SEM_coco/train"
 mk_file(train_root)
-val_root = "./val"
+val_root = "/root/autodl-tmp/SEM_coco/val"
 mk_file(val_root)
 
 train_list = []
@@ -100,11 +100,12 @@ for key, val in mmengine.track_iter_progress(images_all.items()):
             x_min, y_min, x_max, y_max = (
                 min(polygon[:, 0]), min(polygon[:, 1]), max(polygon[:, 0]), max(polygon[:, 1])
             )
+            polygon = [p for x in polygon for p in x]  # 多边形区域没问题，bbox有问题
             data_anno = dict(
                 image_id=idx_val,
                 id=obj_count_val,
                 category_id=0,
-                bbox=[x_min, y_min, x_max, y_max],
+                bbox=[x_min, y_min, x_max - x_min, y_max - y_min],
                 area=(x_max - x_min) * (y_max - y_min),
                 segmentation=[polygon],
                 iscrowd=0
@@ -132,12 +133,17 @@ for key, val in mmengine.track_iter_progress(images_all.items()):
             x_min, y_min, x_max, y_max = (
                 min(polygon[:, 0]), min(polygon[:, 1]), max(polygon[:, 0]), max(polygon[:, 1])
             )
+            # for debug
+            # bbox = np.array([[x_min, y_min, x_max, y_max], ])
+            # img = mmcv.imread(img_path)
+            # mmcv.imshow_bboxes(img, bbox, show=False, out_file='./temp.png')
+            
             polygon = [p for x in polygon for p in x]
             data_anno = dict(
                 image_id=idx_train,
                 id=obj_count_train,
                 category_id=0,
-                bbox=[x_min, y_min, x_max, y_max],
+                bbox=[x_min, y_min, x_max - x_min, y_max - y_min],  # 这里的bbox的定义是左上角、宽度和高度（尤为注意）
                 area=(x_max - x_min) * (y_max - y_min),
                 segmentation=[polygon],
                 iscrowd=0
@@ -158,8 +164,8 @@ MA_val_coco_json = dict(
     categories=[{'id':0, 'name': 'MA'}]
 )
 
-mmengine.dump(MA_train_coco_json, './MA_train_coco.json') 
-mmengine.dump(MA_val_coco_json, './MA_val_coco.json')
+mmengine.dump(MA_train_coco_json, '/root/autodl-tmp/SEM_coco/annotations/MA_train_coco.json') 
+mmengine.dump(MA_val_coco_json, '/root/autodl-tmp/SEM_coco/annotations/MA_val_coco.json')
 
 
 
