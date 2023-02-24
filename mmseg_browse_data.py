@@ -2,10 +2,11 @@
 import argparse
 import os.path as osp
 
-from mmseg.utils import register_all_modules
-from mmseg.registry import DATASETS, VISUALIZERS
 from mmengine.utils import ProgressBar
 from mmengine.config import Config, DictAction
+
+from mmseg.utils import register_all_modules
+from mmseg.registry import DATASETS, VISUALIZERS
 
 
 def parse_args():
@@ -37,9 +38,12 @@ def parse_args():
 
 
 def main():
-
     args = parse_args()
     cfg = Config.fromfile(args.config)
+    if args.cfg_options is not None:
+        cfg.merge_from_dict(args.cfg_options)
+
+    # register all modules in mmdet into the registries
     register_all_modules()
 
     dataset = DATASETS.build(cfg.train_dataloader.dataset)
@@ -52,15 +56,20 @@ def main():
         img = img[..., [2, 1, 0]]  # bgr to rgb
         data_sample = item['data_samples'].numpy()
         img_path = osp.basename(item['data_samples'].img_path)
+
+        out_file = osp.join(
+            args.output_dir,
+            osp.basename(img_path)) if args.output_dir is not None else None
+        
         visualizer.add_datasample(
-            name='gt_mask',
+            name=osp.basename(img_path),
             image=img,
             data_sample=data_sample,
             draw_gt=True,
             draw_pred=False,
-            wait_time=0,
-            out_file=osp.join(args.output_dir, img_path),
-            show=False)
+            wait_time=args.show_interval,
+            out_file=out_file,
+            show=not args.not_show)
         progress_bar.update()
 
 
