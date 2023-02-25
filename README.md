@@ -1,9 +1,11 @@
 # data_preprocess
+## 通用工具
+- split_train_val.py 将数据分割为训练集和验证集
+- move_rename.py 复制并改变文件名称
+- mmdet_browse_data.py mmdetection中检查data preprocesser后的数据显示
+- mmseg_browse_data.py mmsegmentation中检查data preprocesser后的数据显示
+- hr2lr_data_convert.py 构造DIV2K数据格式（高分辨率图像bicubic下采样获得x2、x3、x4的分辨率）
 
-## 文件描述
-- 处理扫描电镜原始标注数据，转化到mmlab支持的coco格式（data split 和 train val.json文件的生成）
-使用mmdetection中的分析工具
-tools/analysis_tools/browse_dataset.py 验证mask rcnn实例分割中经过data_preprocesser后图像的状态
-
-- 数据分割为训练集和验证集
-- 图像超分将原始图像下采样到DIV2k对应的格式
+## 特殊数据集工具
+- steeldata_analyse.py 海伦凯勒数据集拓扑标注转化为coco数据集格式（目标检测和实例分割）
+- TODO 海伦凯勒数据集转化为VOC语义分割数据集
